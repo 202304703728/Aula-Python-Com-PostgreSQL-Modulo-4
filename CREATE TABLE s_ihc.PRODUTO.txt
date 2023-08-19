@@ -1,0 +1,17 @@
+CREATE TABLE s_ihc."PRODUTO"
+(
+    "CODIGO" integer NOT NULL,
+    "NOME" text NOT NULL,
+    "PRECO" real NOT NULL,
+    PRIMARY KEY ("CODIGO")
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE ihc;
+
+ALTER TABLE IF EXISTS s_ihc."PRODUTO"
+    OWNER to postgres;
+
+COMMENT ON TABLE s_ihc."PRODUTO"
+    IS 'Tabela criada para o exercício de interface gráfica python com bd';
