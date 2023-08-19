@@ -101,6 +101,7 @@ class PrincipalDB:
             print('Dados dos Produtos')
 
         except:
+            showinfo("Relação de Produtos", message="Não existem produtos cadastrados.")
             print("Não existem produtos cadastrados.")
 
     def fLerCampos(self):
@@ -115,33 +116,58 @@ class PrincipalDB:
             print("Relação de produtos carregada com sucesso!")
 
         except:
+            showinfo("Relação de Produtos", message="Não foi possível ler os dados dos produtos.")
             print("Não foi possível ler os dados dos produtos.")
 
         return codigo, nome, preco
 
     def fCadastrarProduto(self):
         try:
-            showinfo("Cadastrar Produto", message="Em desenvolvimento.")
+            # showinfo("Cadastrar Produto", message="Em desenvolvimento.")
             print("** Informações sobre o Produto **")
+            codigo, nome, preco = self.fLerCampos()
+            cadastrou = self.objDB.inserirDados(codigo, nome, preco)
+            if cadastrou == True:
+                self.treeProdutos.insert('', 'end', iid=self.iid, values=(codigo, nome, preco))
+                self.iid = self.iid + 1
+                self.id = self.id + 1
+                self.fLimparTela()
+                print("Produto cadastrado com sucesso!")
 
         except:
-            print("Não foi possível fazer o cadastro do produto.")
+            showinfo("Relação de Produtos", message="Não foi possível cadastrar o produto.")
+            print("Não foi possível cadastrar o produto.")
 
     def fAtualizarProduto(self):
         try:
-            showinfo("Atualizar Produto", message="Em desenvolvimento.")
+            # showinfo("Atualizar Produto", message="Em desenvolvimento.")
             print("** Informações sobre o Produto **")
-
+            codigo, nome, preco = self.fLerCampos()
+            self.objDB.atualizarDados(codigo, nome, preco)
+            # recarregar dados na tela
+            self.treeProdutos.delete(*self.treeProdutos.get_children())
+            self.carregarDadosIniciais()
+            self.fLimparTela()
+            print("Produto atualizado com sucesso!")
 
         except:
-            print("Não foi possível atualizar o cadastro do produto.")
+            showinfo("Relação de Produtos", message="Não foi possível atualizar o produto.")
+            print("Não foi possível atualizar o produto.")
 
     def fExcluirProduto(self):
         try:
-            showinfo("Excluir Produto", message="Em desenvolvimento.")
+            # showinfo("Excluir Produto", message="Em desenvolvimento.")
             print("** Informações sobre o Produto **")
+            codigo, nome, preco = self.fLerCampos()
+            self.objDB.excluirDados(codigo)
+            # recarregar dados na tela
+            self.treeProdutos.delete(*self.treeProdutos.get_children())
+            self.carregarDadosIniciais()
+            self.fLimparTela()
+            print("Produto excluído com sucesso!")
 
         except:
+            showinfo("Relação de Produtos", message="Não foi possível excluir o produto.")
             print("Não foi possível excluir o produto.")
 
     def fLimparTela(self):
@@ -153,4 +179,5 @@ class PrincipalDB:
             print("Campos limpos!")
 
         except:
+            showinfo("Relação de Produtos", message="Não foi possível limpar os campos.")
             print("Não foi possível limpar os campos.")

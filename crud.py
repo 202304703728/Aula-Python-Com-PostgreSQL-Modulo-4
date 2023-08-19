@@ -5,7 +5,7 @@ Programa responsável pelas operações CRUD
 """
 
 import psycopg2
-
+from tkinter.messagebox import showinfo
 
 # Classe com os métodos para realizar as operações de interação com o BD
 class AppBD:
@@ -28,7 +28,7 @@ class AppBD:
             self.abrirConexao()
             cursor = self.connection.cursor()
             print("Selecionando produtos, aguarde...")
-            sql_select_query = """SELECT * FROM s_ihc."PRODUTO" """
+            sql_select_query = """SELECT * FROM s_ihc."PRODUTO" ORDER BY "CODIGO" ASC """
             cursor.execute(sql_select_query)
             registros = cursor.fetchall()
             print(registros)
@@ -49,12 +49,24 @@ class AppBD:
         try:
             self.abrirConexao()
             cursor = self.connection.cursor()
-            postgres_insert_query = """INSERT INTO s_ihc."PRODUTO" ("CODIGO", "NOME", "PRECO") VALUES (%s, %s, %s)"""
-            record_to_insert = (codigo, nome, preco)
-            cursor.execute(postgres_insert_query, record_to_insert)
-            self.connection.commit()
-            count = cursor.rowcount
-            print(count, "Produto cadastrado com sucesso!")
+
+            print("Localizando o produto, aguarde...")
+            sql_select_query = """select * from s_ihc."PRODUTO" where "CODIGO" = %s"""
+            cursor.execute(sql_select_query, [codigo])
+            record = cursor.fetchone()
+
+            if record:
+                showinfo("Relação de Produtos", message="Esse produto já foi cadastrado.")
+                return False
+
+            else:
+                postgres_insert_query = """INSERT INTO s_ihc."PRODUTO" ("CODIGO", "NOME", "PRECO") VALUES (%s, %s, %s)"""
+                record_to_insert = (codigo, nome, preco)
+                cursor.execute(postgres_insert_query, record_to_insert)
+                self.connection.commit()
+                count = cursor.rowcount
+                print(count, "Produto cadastrado com sucesso!")
+                return True
 
         except (Exception, psycopg2.Error) as error:
             if self.connection:
@@ -71,20 +83,23 @@ class AppBD:
         try:
             self.abrirConexao()
             cursor = self.connection.cursor()
+
             print("Localizando o produto, aguarde...")
             sql_select_query = """select * from s_ihc."PRODUTO" where "CODIGO" = %s"""
-            cursor.execute(sql_select_query, (codigo,))
+            cursor.execute(sql_select_query, [codigo])
             record = cursor.fetchone()
             print(record)
+
             # Atualizando o registro do produto
-            sql_update_query = """update s_ihc."PRODUTO" set "NOME" = %s, "PRECO" = %s where "CODIGO" = %s"""
-            cursor.execute(sql_update_query, (nome, codigo, preco))
+            print("Atualizando o produto, aguarde...")
+            sql_update_query = """update s_ihc."PRODUTO" set "NOME"=%s, "PRECO"=%s where "CODIGO"=%s"""
+            cursor.execute(sql_update_query, (nome, preco, codigo))
             self.connection.commit()
             count = cursor.rowcount
             print(count, "Produto atualizado com sucesso!")
             print("Dados do produto após a atualização: ")
-            # Não repeti a linha que define sql_select_query porque é igual à anterior
-            cursor.execute(sql_select_query, (codigo,))
+            sql_select_query = """select * from s_ihc."PRODUTO" where "CODIGO" = %s"""
+            cursor.execute(sql_select_query, [codigo])
             record = cursor.fetchone()
             print(record)
 
@@ -103,8 +118,8 @@ class AppBD:
             self.abrirConexao()
             cursor = self.connection.cursor()
             # Exclui o produto
-            sql_delete_query = """delete from s_ihc."PRODUTO" where "CODIGO" = %s"""
-            cursor.execute(sql_delete_query, (codigo,))
+            sql_delete_query = """delete from s_ihc."PRODUTO" where "CODIGO"=%s"""
+            cursor.execute(sql_delete_query, [codigo])
             self.connection.commit()
             count = cursor.rowcount
             print(count, "Produto excluído com sucesso!")
